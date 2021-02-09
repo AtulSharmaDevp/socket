@@ -17,6 +17,7 @@ class RabbitMq {
         this.assertQueue(RABITMQ.CANCELORDER);
         this.assertQueue(RABITMQ.NEWORDER);
         this.assertQueue(RABITMQ.UPDATE_DESPOSIT);
+        this.assertQueue(RABITMQ.TRADE_BASE);
 
         this.assertQueue(RABITMQ.SETORDER_POSITIONS);
 
@@ -24,7 +25,7 @@ class RabbitMq {
         this.assertQueue(RABITMQ.STAT);
 
         this.pairStart();
-        this.getBuySellOrder(); 
+        this.getBuySellOrder();
         this.orderCancel();
         this.updateBalance();
 
@@ -36,7 +37,7 @@ class RabbitMq {
         return error;
       });
   }
-  public async connect() { 
+  public async connect() {
     return new Promise((resolve, reject) => {
       console.log('Going to connect -----------', process.env.RabbitMq);
       amqp.connect(process.env.RabbitMq, async (err, conn) => {
@@ -56,30 +57,19 @@ class RabbitMq {
     });
   }
 
-  public async pairStart(){
-    const maintrading = `${process.env.TRADING_MAIN}/trading/trade/pair-list`;
-    let arr = []; 
-    const resp: any = await Utilities.curlRequest(maintrading, {'Content-Type': 'application/json'});
-    const pairs = JSON.parse(resp.response).data;
-    for(const pair of pairs){
-      console.log('Pair', pair);
-      const queue = RABITMQ.TRADE_BASE + pair.pair_key;
-      this.assertQueue(queue);
-      console.log("QUEUE ========>" , queue);
-      let newconn = await this.channel.consume(
-        queue, async (msg: any) => {
-          const data = JSON.parse(msg.content.toString());
-          console.log(`New trade in ${queue}`, data);
-          const resp: any = await socketHelper.default.pushTradesByPOair(data.data, pair.pair_key);
-          if (resp === true) {
-            this.channel.ack(msg);
-          }
-        },
-        { noAck: false });
+  public async pairStart() {
 
-        arr.push(newconn);
+    let newconn = await this.channel.consume(
+      RABITMQ.TRADE_BASE, async (msg: any) => {
+        const data = JSON.parse(msg.content.toString());
+        console.log(`New trade in ${RABITMQ.TRADE_BASE}`, data);
+        const resp: any = await socketHelper.default.pushTradesByPOair(data.data);
+        if (resp === true) {
+          this.channel.ack(msg);
+        }
+      },
+      { noAck: false });
 
-    }
   }
 
   public assertQueue(queue: string) {
@@ -88,12 +78,12 @@ class RabbitMq {
   public async consumeQueue(queue: string) {
 
     this.channel.consume(
-        queue, async (msg: any) => {
-          const data = JSON.parse(msg.content.toString());
-          this.channel.ack(msg);
-          return data;
-        },
-        { noAck: false });
+      queue, async (msg: any) => {
+        const data = JSON.parse(msg.content.toString());
+        this.channel.ack(msg);
+        return data;
+      },
+      { noAck: false });
   }
 
   public async getStat() {
@@ -108,7 +98,7 @@ class RabbitMq {
       { noAck: false });
   }
 
-  public async getBuySellOrder () {
+  public async getBuySellOrder() {
     this.channel.consume(
       RABITMQ.NEWORDER, async (msg: any) => {
         const data = JSON.parse(msg.content.toString());
@@ -121,7 +111,7 @@ class RabbitMq {
   }
 
 
-  public async updateBalance () {
+  public async updateBalance() {
     this.channel.consume(
       RABITMQ.UPDATEBALANCE, async (msg: any) => {
         const data = JSON.parse(msg.content.toString());
@@ -137,7 +127,7 @@ class RabbitMq {
       { noAck: false });
   }
 
-  public async orderCancel () {
+  public async orderCancel() {
     this.channel.consume(
       RABITMQ.CANCELORDER, async (msg: any) => {
         const data = JSON.parse(msg.content.toString());

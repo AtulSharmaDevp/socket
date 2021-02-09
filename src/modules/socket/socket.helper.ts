@@ -1,4 +1,4 @@
-import { ENDPOINTS, SERVER,RABITMQ } from '../../constant/response';
+import { ENDPOINTS, SERVER, RABITMQ } from '../../constant/response';
 import * as Helpers from '../../helpers';
 import RedisHelper from '../../helpers/common/redis.helper';
 import utilities from '../../helpers/common/utilities.helper';
@@ -9,18 +9,18 @@ import { parseConnectionUrl } from 'nodemailer/lib/shared';
 const globalVar: any = global;
 class SocketHelper {
 
-/**
- * GET ORDER WITH USER ID AND ORDER ID and PAIR ID
- */
+  /**
+   * GET ORDER WITH USER ID AND ORDER ID and PAIR ID
+   */
   public async emitBuySell(pair: any, socketId: any) {
-    let buyList: any = await RedisHelper.getString('orderBook_' + pair + '_0' , redisTradingDb);
+    let buyList: any = await RedisHelper.getString('orderBook_' + pair + '_0', redisTradingDb);
     if (buyList) {
       // console.log(buyList);
     } else {
       buyList = [];
     }
 
-    let sellList: any = await RedisHelper.getString('orderBook_' + pair + '_1' , redisTradingDb);
+    let sellList: any = await RedisHelper.getString('orderBook_' + pair + '_1', redisTradingDb);
     if (sellList) {
       // console.log(sellList);
     } else {
@@ -35,8 +35,8 @@ class SocketHelper {
   }
 
   public async emitTradeData(pair: any, socketId: any) {
-    let tradeData: any = await RedisHelper.getString('tradeBook_' + pair , redisTradingDb);
-    if (tradeData !== null){
+    let tradeData: any = await RedisHelper.getString('tradeBook_' + pair, redisTradingDb);
+    if (tradeData !== null) {
       // exist
     } else {
       tradeData = [];
@@ -51,33 +51,33 @@ class SocketHelper {
   }
 
   public async emitStat(pair: any, socketId: any) {
-    let statData: any = await RedisHelper.getString('stat_' + pair , redisTradingDb);
+    let statData: any = await RedisHelper.getString('stat_' + pair, redisTradingDb);
     if (statData) {
       // console.log(statData);
     } else {
       statData = [];
     }
-    await globalVar.socketConnection.of('socket').to(socketId).emit('stat_' + pair , statData);
+    await globalVar.socketConnection.of('socket').to(socketId).emit('stat_' + pair, statData);
     return true;
   }
 
   public async emitStatAllPair(pair: any, socketId: any) {
     let newValue: any;
-    let allpAir: any = await RedisHelper.getString('pairListing' , redisTradingDb);
+    let allpAir: any = await RedisHelper.getString('pairListing', redisTradingDb);
     // console.log('typeof', typeof(allpAir));
     // console.log('this is all pair datatttttttttttaaaaa', allpAir)
     allpAir = JSON.parse(allpAir);
     // console.log('allpAir-------', allpAir);
 
-    for(let newValue of allpAir){
+    for (let newValue of allpAir) {
       // console.log('this is pair need to get data for stat ---', newValue.pair_key);
-      let statData: any =  await RedisHelper.getString('stat_' + newValue.pair_key , redisTradingDb);
+      let statData: any = await RedisHelper.getString('stat_' + newValue.pair_key, redisTradingDb);
       if (statData !== null) {
         // console.log('this is data for pair I am going to emit', statData);
         statData = JSON.parse(statData);
-     
+
         console.log('==>', statData);
-        statData.pair = newValue.pair_key ;
+        statData.pair = newValue.pair_key;
         statData = JSON.stringify(statData);
         console.log('==>', statData);
 
@@ -85,8 +85,8 @@ class SocketHelper {
         statData = [];
       }
       console.log('emmiting stat for pair', newValue.pair_key);
-      await globalVar.socketConnection.of('socket').to(socketId).emit('stat_' + newValue.pair_key , statData);
-      await globalVar.socketConnection.of('socket').to(socketId).emit('allStat' , statData);
+      await globalVar.socketConnection.of('socket').to(socketId).emit('stat_' + newValue.pair_key, statData);
+      await globalVar.socketConnection.of('socket').to(socketId).emit('allStat', statData);
 
     }
 
@@ -125,20 +125,20 @@ class SocketHelper {
 
   public async emitAllStat() {
     let newValue: any;
-    let allpAir: any = await RedisHelper.getString('pairListing' , redisTradingDb);
+    let allpAir: any = await RedisHelper.getString('pairListing', redisTradingDb);
     // console.log('typeof', typeof(allpAir));
     // console.log('this is all pair datatttttttttttaaaaa', allpAir)
     allpAir = JSON.parse(allpAir);
     // console.log('allpAir-------', allpAir);
 
-    for(let newValue of allpAir){
+    for (let newValue of allpAir) {
       // console.log('this is pair need to get data for stat ---', newValue.pair_key);
-      let statData: any =  await RedisHelper.getString('stat_' + newValue.pair_key , redisTradingDb);
+      let statData: any = await RedisHelper.getString('stat_' + newValue.pair_key, redisTradingDb);
       if (statData !== null) {
         // console.log('this is data for pair I am going to emit', statData);
         statData = JSON.parse(statData);
         console.log('==>', statData);
-        statData.pair = newValue.pair_key ;
+        statData.pair = newValue.pair_key;
 
         statData = JSON.stringify(statData);
 
@@ -148,7 +148,7 @@ class SocketHelper {
         statData = [];
       }
       console.log('emmiting stat for pair', newValue.pair_key);
-      await globalVar.socketConnection.of('socket').to(newValue.pair_key).emit('allStat' , statData);
+      await globalVar.socketConnection.of('socket').to(newValue.pair_key).emit('allStat', statData);
 
     }
 
@@ -158,7 +158,7 @@ class SocketHelper {
   public async emitBalances(coin: any, socketId: any, balances: any) {
     console.log('emmiting balance for ', coin);
     await globalVar.socketConnection.of('socket').to(socketId)
-    .emit('wallet', { data: JSON.parse((JSON.parse(balances.response).data.response)).data, pair: coin });
+      .emit('wallet', { data: JSON.parse((JSON.parse(balances.response).data.response)).data, pair: coin });
     return true;
   }
 
@@ -169,7 +169,7 @@ class SocketHelper {
 
   public async pushStat(data: any) {
     // console.log('data', data);
-    const responseCheck =  await globalVar.socketConnection.of('socket').to(data[0]).emit('stat_' + data[0], data[1]);
+    const responseCheck = await globalVar.socketConnection.of('socket').to(data[0]).emit('stat_' + data[0], data[1]);
     return true;
   }
 
@@ -178,28 +178,28 @@ class SocketHelper {
     return true;
   }
 
-  public async pushTradesByPOair(data: any, pairCoin: any) {
-    console.log('single traddddddddddddddeeee' , data);
+  public async pushTradesByPOair(data: any) {
+    console.log('single traddddddddddddddeeee', data);
     const userId1 = data[0];
     const userId2 = data[1];
     const tradeData = data[2];
-    const coin = pairCoin;
     const markeTlimit = data[6];
     const side = data[7];
+    const coin = data[5];
     // send trade to pair room
     // console.log('this is single trade data we are sending',  [[Number(tradeData[0]), Number(tradeData[1]), tradeData[2]]]);
-   
+
     // console.log('00000000000 here am emiting trade for coin ', coin) 
-    console.log('pushing data is', [Number(tradeData[0]),Number(tradeData[1]), Number(tradeData[2]), Number(tradeData[3]), tradeData[4] , userId1 , userId2, markeTlimit , side]);
-    await globalVar.socketConnection.of('socket').to(coin).emit('trade', [[Number(tradeData[0]),Number(tradeData[1]), Number(tradeData[2]), Number(tradeData[3]), tradeData[4] , userId1 , userId2, markeTlimit , side]]);
-    
+    console.log('pushing data is', [Number(tradeData[0]), Number(tradeData[1]), Number(tradeData[2]), Number(tradeData[3]), tradeData[4], userId1, userId2, markeTlimit, side]);
+    await globalVar.socketConnection.of('socket').to(coin).emit('trade', [[Number(tradeData[0]), Number(tradeData[1]), Number(tradeData[2]), Number(tradeData[3]), tradeData[4], userId1, userId2, markeTlimit, side]]);
+
     console.log('markeTlimit', markeTlimit)
-    if(markeTlimit === null || markeTlimit === 'sell'){
+    if (markeTlimit === null || markeTlimit === 'sell') {
       console.log('updating buy order book here -----')
       await this.updateRedisOrdersList(tradeData[0], tradeData[3], 0, '-', coin); // [buyprice, sellprice , executedprice , date]
     }
 
-    if(markeTlimit === null ||  markeTlimit === 'buy'){
+    if (markeTlimit === null || markeTlimit === 'buy') {
       console.log('updating sell order book here -----')
       await this.updateRedisOrdersList(tradeData[1], tradeData[3], 1, '-', coin);
     }
@@ -212,12 +212,12 @@ class SocketHelper {
     // console.log('3333333333  Balance update here ')
     // now find socket id from user id from login user radis server and update raddis cache for balances
     // now get balances and send to users
-    if(userId1 != null){
+    if (userId1 != null) {
       await this.balanceUpdateOnTrade(userId1, pairCoin);
     }
 
     // console.log('444444444444  Balance update here user 2 ')
-    if(userId2 != null){
+    if (userId2 != null) {
 
       await this.balanceUpdateOnTrade(userId2, pairCoin);
     }
@@ -267,13 +267,13 @@ class SocketHelper {
     const loginUser = await activeUsr.filter((x: any) => x.userId === userId);
 
     if (loginUser.length > 0) {
-      let newValue: any; 
+      let newValue: any;
       await Object.entries(loginUser).forEach(
         ([key, value]) => {
           newValue = value;
           const socketId = newValue.userSocketId;
           globalVar.socketConnection.of('socket').to(socketId)
-          .emit('wallet', { data: balances, pair: coin });
+            .emit('wallet', { data: balances, pair: coin });
 
         },
       );
@@ -309,21 +309,21 @@ class SocketHelper {
 
     for (const element of uniquePairs) {
       // console.log('getting values for  =====>>>>>', element);
-      let buyList: any = await RedisHelper.getString('orderBook_' + element.userPair + '_0' , redisTradingDb);
+      let buyList: any = await RedisHelper.getString('orderBook_' + element.userPair + '_0', redisTradingDb);
       if (buyList) {
         // console.log('this is my buy order @ CRON' , buyList);
       } else {
         buyList = [];
       }
 
-      let sellList: any = await RedisHelper.getString('orderBook_' + element.userPair + '_1' , redisTradingDb);
+      let sellList: any = await RedisHelper.getString('orderBook_' + element.userPair + '_1', redisTradingDb);
       if (sellList) {
         // console.log('this is my sell order @ CRON' , sellList);
       } else {
         sellList = [];
       }
 
-      let tradeData: any = await RedisHelper.getString('tradeBook_' + element.userPair  , redisTradingDb);
+      let tradeData: any = await RedisHelper.getString('tradeBook_' + element.userPair, redisTradingDb);
       if (tradeData) {
         // console.log('this is my tradeData order @ CRON' , tradeData);
       } else {
@@ -364,82 +364,82 @@ class SocketHelper {
   public async getWalletHost(coin: any) {
     let walletUrl: any = '';
 
-    var process_env_dict:any = {};
+    var process_env_dict: any = {};
     process_env_dict['env'] = process.env;
     walletUrl = JSON.parse(JSON.stringify(process_env_dict))['env']['WALLET_MAIN'];
 
-    console.log('this is wallet host', walletUrl);  
+    console.log('this is wallet host', walletUrl);
     return walletUrl;
 
   }
 
-/**
- * UPDATE REDIS SERVER ORDER LIST
- * @param price // pair id
- * @param units // 0 or 1`
- * @param orderType // 0 or 1 (its by price)
- * @param operation // + or -
- */
+  /**
+   * UPDATE REDIS SERVER ORDER LIST
+   * @param price // pair id
+   * @param units // 0 or 1`
+   * @param orderType // 0 or 1 (its by price)
+   * @param operation // + or -
+   */
   public async updateRedisOrdersList(price: number, units: number, orderType: number, operation: string, coin: string) {
 
     // console.log('-------------------------(', operation ,')-------------------------------')
-    console.log(' updating cache --------------', redisTradingDb , 'price --- >', price,  '  coin ---> ', coin, ' orderType -----> ', orderType);
+    console.log(' updating cache --------------', redisTradingDb, 'price --- >', price, '  coin ---> ', coin, ' orderType -----> ', orderType);
 
     try {
       let openBook: any = [];
-    const redisConfig: any = await RedisHelper.getString('orderBook_'  + coin + '_' + orderType , redisTradingDb);
-    // console.log('cjhexkccccccccccccc', 'orderBook_'  + coin + '_' + orderType);
-    // console.log('here updating redis cache ', redisConfig);
-    if (redisConfig !== null || redisConfig.length > 0) {
-      // console.log('li0st exist');
-      openBook = JSON.parse(redisConfig);
-      const priceObj = await openBook.filter((e: any) => e[0] === Number(price));
-      let amt = 0;
-      if (priceObj.length > 0) {
-        if (operation === '+') {
-          amt = await utilities.bn_operations(priceObj[0][1], units, '+');
+      const redisConfig: any = await RedisHelper.getString('orderBook_' + coin + '_' + orderType, redisTradingDb);
+      // console.log('cjhexkccccccccccccc', 'orderBook_'  + coin + '_' + orderType);
+      // console.log('here updating redis cache ', redisConfig);
+      if (redisConfig !== null || redisConfig.length > 0) {
+        // console.log('li0st exist');
+        openBook = JSON.parse(redisConfig);
+        const priceObj = await openBook.filter((e: any) => e[0] === Number(price));
+        let amt = 0;
+        if (priceObj.length > 0) {
+          if (operation === '+') {
+            amt = await utilities.bn_operations(priceObj[0][1], units, '+');
+          } else {
+            amt = await utilities.bn_operations(priceObj[0][1], units, '-');
+          }
+          const newObj = [
+            Number(price),
+            Number(amt),
+            Number(utilities.bn_operations(amt, price, '*')),
+          ];
+          const index = await openBook.findIndex((e: any) => e[0] === Number(price));
+          if (Number(amt) <= 0) {
+            openBook.splice(index, 1);
+          } else {
+            openBook[index] = newObj;
+          }
+
+          // console.log('before saving ------------', openBook);
+
+          RedisHelper.setString('orderBook_' + coin + '_' + orderType, JSON.stringify(openBook), 0, redisTradingDb);
+
+          console.log('updateddddddddd');
         } else {
-          amt = await utilities.bn_operations(priceObj[0][1], units, '-');
-        }
-        const newObj = [
-          Number(price),
-          Number(amt),
-          Number(utilities.bn_operations(amt, price, '*')),
-        ];
-        const index = await openBook.findIndex((e: any) => e[0] === Number(price));
-        if (Number(amt) <= 0) {
-          openBook.splice(index, 1);
-        } else {
-          openBook[index] = newObj;
+          // this price you are searching is not available
+          console.log('this price you are searching is not available');
+
         }
 
-        // console.log('before saving ------------', openBook);
+        // console.log('openBook', openBook);
 
-        RedisHelper.setString('orderBook_'  + coin + '_' + orderType , JSON.stringify(openBook), 0 , redisTradingDb);
-
-        console.log('updateddddddddd');
       } else {
-         // this price you are searching is not available
-         console.log('this price you are searching is not available');
-       
+        console.log('here no any new order just coming here to minus the balance after trade');
       }
+      return true; // just for next
 
-      // console.log('openBook', openBook);
-
-    } else {
-      console.log('here no any new order just coming here to minus the balance after trade');
-    }
-    return true; // just for next
-      
     } catch (error) {
-        console.log('errrrorororororo', error);
-        return true; // just for next
+      console.log('errrrorororororo', error);
+      return true; // just for next
 
     }
-    
+
   }
 
-  public async updateTradeCache(price: any, amount: any, date: any, pairId: any, fromUid: any, toUid: any, side:any) {
+  public async updateTradeCache(price: any, amount: any, date: any, pairId: any, fromUid: any, toUid: any, side: any) {
     let currentTrade: any = await RedisHelper.getString('tradeBook_' + pairId);
 
     currentTrade = JSON.parse(currentTrade);
@@ -453,7 +453,7 @@ class SocketHelper {
 
 
 
-      await RedisHelper.setString('tradeBook_' + pairId , JSON.stringify(tradeBook), 0 , redisTradingDb);
+      await RedisHelper.setString('tradeBook_' + pairId, JSON.stringify(tradeBook), 0, redisTradingDb);
 
 
     } else {
@@ -461,13 +461,13 @@ class SocketHelper {
       currentTrade = await currentTrade.reverse();
       // console.log('this is current ordrer after reverse', currentTrade);
 
-      await currentTrade.push([Number(price), Number(amount), date, fromUid, toUid , side]);
+      await currentTrade.push([Number(price), Number(amount), date, fromUid, toUid, side]);
 
       // console.log('after push data is ', currentTrade);
-      const lengthArr =  currentTrade.length;
-    
-      if(lengthArr > 50){
-        currentTrade = currentTrade.slice(lengthArr - 50 , lengthArr);
+      const lengthArr = currentTrade.length;
+
+      if (lengthArr > 50) {
+        currentTrade = currentTrade.slice(lengthArr - 50, lengthArr);
         // console.log('after slice ', currentTrade);
       }
 
@@ -479,7 +479,7 @@ class SocketHelper {
 
       // console.log('this is current ordrer 2', currentTrade);
       // now update redis server for trade cache
-      await RedisHelper.setString('tradeBook_' + pairId , JSON.stringify(currentTrade), 0 , redisTradingDb);
+      await RedisHelper.setString('tradeBook_' + pairId, JSON.stringify(currentTrade), 0, redisTradingDb);
     }
     return true
   }
@@ -488,27 +488,27 @@ class SocketHelper {
     console.log('this is my user id ', userId);
     // console.log('after trade updating balances');
     console.log("Sending Balances");
-    const token: any = await RedisHelper.getString('jwt_token_' + userId,'0');
+    const token: any = await RedisHelper.getString('jwt_token_' + userId, '0');
     console.log('this is my token', token);
     const pair = pairCoin.split(/[_]/);
     const fromcoin = pair[0];
     const tocoin = pair[1];
-    
-    if(token !== null){
-      const getUserInfoFirst = await this.getBalance(fromcoin, token,  pairCoin);
-      const getUserInfoSecond = await this.getBalance(tocoin, token,  pairCoin);
-      
+
+    if (token !== null) {
+      const getUserInfoFirst = await this.getBalance(fromcoin, token, pairCoin);
+      const getUserInfoSecond = await this.getBalance(tocoin, token, pairCoin);
+
       if (getUserInfoFirst.response === undefined) {
         return false;
       }
-      
+
       let fUserResponse = getUserInfoFirst.response;
       let SUserResponse = getUserInfoSecond.response;
-      
-      if(typeof getUserInfoFirst.response === 'string'){
+
+      if (typeof getUserInfoFirst.response === 'string') {
         fUserResponse = JSON.parse(getUserInfoFirst.response);
       }
-      if(typeof getUserInfoSecond.response === 'string'){
+      if (typeof getUserInfoSecond.response === 'string') {
         SUserResponse = JSON.parse(getUserInfoSecond.response);
       }
 
@@ -520,37 +520,37 @@ class SocketHelper {
         await this.pushBalances([fromcoin, userId, fUserResponse.data]);
 
       }
-      
+
 
 
       if (getUserInfoSecond !== false) {
         await this.pushBalances([tocoin, userId, SUserResponse.data]);
       }
-    }  
+    }
     return true
 
   }
 
-  public async updateStatLastPrice(pair:string, price:number){
- 
+  public async updateStatLastPrice(pair: string, price: number) {
+
     // console.log(' updating stat hereeee now for price cccccccccccccccccc = ', price);
-    let statData:any  = await RedisHelper.getString('stat_' + pair , redisTradingDb);
-    if(statData != null){
+    let statData: any = await RedisHelper.getString('stat_' + pair, redisTradingDb);
+    if (statData != null) {
       // let statNewData: any = await JSON.stringify(statData)
       let statNewData = await JSON.parse(statData);
       // console.log('checkkkk hererer', statNewData);
       console.log(statNewData.p);
-      if(statNewData.p != undefined){
+      if (statNewData.p != undefined) {
         // insert new price it can b single but need to check in future
         statNewData.p = price
       } else {
         statNewData.p = price
       }
       // console.log('new stat data going to place ', statNewData)
-      await RedisHelper.setString('stat_' + pair , JSON.stringify(statNewData), 0 , redisTradingDb);
+      await RedisHelper.setString('stat_' + pair, JSON.stringify(statNewData), 0, redisTradingDb);
 
     }
-    return true; 
+    return true;
 
   }
 
@@ -568,13 +568,13 @@ class SocketHelper {
     const loginUser = await activeUsr.filter((x: any) => x.userId === userId);
 
     if (loginUser.length > 0) {
-      let newValue: any; 
+      let newValue: any;
       await Object.entries(loginUser).forEach(
         ([key, value]) => {
           newValue = value;
           const socketId = newValue.userSocketId;
           globalVar.socketConnection.of('socket').to(socketId)
-          .emit('updateDeposits', { data: true });
+            .emit('updateDeposits', { data: true });
 
         },
       );
