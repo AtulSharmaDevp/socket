@@ -183,9 +183,9 @@ class SocketHelper {
     const userId1 = data[0];
     const userId2 = data[1];
     const tradeData = data[2];
-    const markeTlimit = data[6];
-    const side = data[7];
-    const coin = data[5];
+    const markeTlimit = data[7];
+    const side = data[8];
+    const coin = data[6];
     // send trade to pair room
     // console.log('this is single trade data we are sending',  [[Number(tradeData[0]), Number(tradeData[1]), tradeData[2]]]);
 
