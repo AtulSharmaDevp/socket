@@ -213,13 +213,13 @@ class SocketHelper {
     // now find socket id from user id from login user radis server and update raddis cache for balances
     // now get balances and send to users
     if (userId1 != null) {
-      await this.balanceUpdateOnTrade(userId1, pairCoin);
+      await this.balanceUpdateOnTrade(userId1, coin);
     }
 
     // console.log('444444444444  Balance update here user 2 ')
     if (userId2 != null) {
 
-      await this.balanceUpdateOnTrade(userId2, pairCoin);
+      await this.balanceUpdateOnTrade(userId2, coin);
     }
 
 
@@ -231,7 +231,7 @@ class SocketHelper {
     // await rabbitmqHelper.createQueue(RABITMQ.STOPLOSS, JSON.stringify(data));
 
 
-    await this.updateStatLastPrice(pairCoin, tradeData[2])
+    await this.updateStatLastPrice(coin, tradeData[2])
     // here need to update executed orice for this price under stat as well
 
 
