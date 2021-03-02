@@ -3,7 +3,7 @@ import { RABITMQ } from '../../constant/response';
 import { socketHelper, Utilities } from '../../helpers';
 
 class RabbitMq {
-  public channel: any;
+  public channel: amqp.Channel;
 
   constructor() {
     console.log('Rabbit mq working here');
@@ -13,7 +13,7 @@ class RabbitMq {
     await this.connect().then(
       (res: any) => {
         this.channel = res;
-
+        this.channel.prefetch(1);
         this.assertQueue(RABITMQ.CANCELORDER);
         this.assertQueue(RABITMQ.NEWORDER);
         this.assertQueue(RABITMQ.UPDATE_DESPOSIT);
